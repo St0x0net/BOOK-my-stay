@@ -5,64 +5,36 @@ import java.util.Map;
  * ============================================================
  * CLASS - RoomInventory
  * ============================================================
- *
- * Use Case 3: Centralized Room Inventory Management
- *
- * Description:
- * This class acts as the single source of truth
- * for room availability in the hotel.
- *
- * Room pricing and characteristics are obtained
- * from Room objects, not duplicated here.
- *
- * This avoids multiple sources of truth and
- * keeps responsibilities clearly separated.
- *
- * @version 3.1
+ * Stores centralized availability of rooms
  */
 
-class UC3 {
+class App{
 
-    // Key -> Room type
-    // Value -> Available room count
     private Map<String, Integer> roomAvailability;
 
-    /**
-     * Constructor initializes the inventory
-     * with default availability values.
-     */
     public RoomInventory() {
         roomAvailability = new HashMap<>();
         initializeInventory();
     }
 
-    /**
-     * Initializes room availability data.
-     */
     private void initializeInventory() {
         roomAvailability.put("Single", 5);
         roomAvailability.put("Double", 3);
         roomAvailability.put("Suite", 2);
     }
 
-    /**
-     * Returns the current availability map.
-     */
     public Map<String, Integer> getRoomAvailability() {
         return roomAvailability;
-    }
-
-    /**
-     * Updates availability for a specific room type.
-     */
-    public void updateAvailability(String roomType, int count) {
-        roomAvailability.put(roomType, count);
     }
 }
 
 /**
- * Room class representing room characteristics
+ * ============================================================
+ * CLASS - Room
+ * ============================================================
+ * Domain model representing room details
  */
+
 class Room {
 
     private String type;
@@ -96,13 +68,69 @@ class Room {
 
 /**
  * ============================================================
- * MAIN CLASS - UseCase3InventorySetup
+ * CLASS - RoomSearchService
  * ============================================================
  *
- * Demonstrates centralized room inventory management
+ * Use Case 4: Room Search & Availability Check
+ *
+ * Provides read-only search functionality
+ * for guests to view available rooms.
  */
 
-public class UseCase3InventorySetup {
+class RoomSearchService {
+
+    public void searchAvailableRooms(
+            RoomInventory inventory,
+            Room singleRoom,
+            Room doubleRoom,
+            Room suiteRoom) {
+
+        Map<String, Integer> availability = inventory.getRoomAvailability();
+
+        System.out.println("Room Search\n");
+
+        // Single Room
+        if (availability.get("Single") > 0) {
+            System.out.println("Single Room:");
+            System.out.println("Beds: " + singleRoom.getBeds());
+            System.out.println("Size: " + singleRoom.getSize() + " sqft");
+            System.out.println("Price per night: " + singleRoom.getPrice());
+            System.out.println("Available: " + availability.get("Single"));
+            System.out.println();
+        }
+
+        // Double Room
+        if (availability.get("Double") > 0) {
+            System.out.println("Double Room:");
+            System.out.println("Beds: " + doubleRoom.getBeds());
+            System.out.println("Size: " + doubleRoom.getSize() + " sqft");
+            System.out.println("Price per night: " + doubleRoom.getPrice());
+            System.out.println("Available: " + availability.get("Double"));
+            System.out.println();
+        }
+
+        // Suite Room
+        if (availability.get("Suite") > 0) {
+            System.out.println("Suite Room:");
+            System.out.println("Beds: " + suiteRoom.getBeds());
+            System.out.println("Size: " + suiteRoom.getSize() + " sqft");
+            System.out.println("Price per night: " + suiteRoom.getPrice());
+            System.out.println("Available: " + availability.get("Suite"));
+            System.out.println();
+        }
+    }
+}
+
+/**
+ * ============================================================
+ * MAIN CLASS - UseCase4RoomSearch
+ * ============================================================
+ *
+ * Demonstrates how guests can search
+ * available rooms without modifying inventory
+ */
+
+public class UseCase4RoomSearch {
 
     public static void main(String[] args) {
 
@@ -112,22 +140,12 @@ public class UseCase3InventorySetup {
         Room doubleRoom = new Room("Double", 2, 400, 2500.0);
         Room suite = new Room("Suite", 3, 750, 5000.0);
 
-        Map<String, Integer> availability = inventory.getRoomAvailability();
+        RoomSearchService searchService = new RoomSearchService();
 
-        System.out.println("Hotel Room Inventory Status\n");
-
-        printRoom(single, availability.get(single.getType()));
-        printRoom(doubleRoom, availability.get(doubleRoom.getType()));
-        printRoom(suite, availability.get(suite.getType()));
-    }
-
-    private static void printRoom(Room room, int available) {
-
-        System.out.println(room.getType() + " Room:");
-        System.out.println("Beds: " + room.getBeds());
-        System.out.println("Size: " + room.getSize() + " sqft");
-        System.out.println("Price per night: " + room.getPrice());
-        System.out.println("Available Rooms: " + available);
-        System.out.println();
+        searchService.searchAvailableRooms(
+                inventory,
+                single,
+                doubleRoom,
+                suite);
     }
 }
